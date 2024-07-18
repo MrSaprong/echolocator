@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "263853714411",
+    "project_id": "gps-family-tracker-86b91",
+    "storage_bucket": "gps-family-tracker-86b91.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:263853714411:android:302c285e111e9887ba47ae",
+        "android_client_info": {
+          "package_name": "com.example.gpstracker"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWvyZ9b7RkPfPNJwnngAF5aDA-UayasOU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
