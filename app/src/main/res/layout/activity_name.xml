@@ -14,11 +14,12 @@
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="88dp"
-        android:src="@drawable/defaultprofile" />
+        android:src="@drawable/defaultprofile"
+        android:contentDescription="@string/profile_image_desc" />
 
     <EditText
         android:id="@+id/editTextText"
-        android:layout_width="385dp"
+        android:layout_width="match_parent"
         android:layout_height="60dp"
         android:layout_below="@id/circleImageView"
         android:layout_marginStart="16dp"

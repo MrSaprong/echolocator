@@ -43,5 +43,6 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="286dp"
+        android:onClick="registerUser"
         android:text="REGISTER" />
 </RelativeLayout>

@@ -4,36 +4,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:padding="16dp"
     tools:context=".MainActivity">
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        tools:context=".MainActivity">
+        android:padding="16dp">
 
         <Button
             android:id="@+id/button2"
-            android:layout_width="380dp"
-            android:layout_height="65dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentTop="true"
-            android:layout_marginStart="20dp"
-            android:layout_marginTop="713dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_alignParentBottom="true"
+            android:layout_centerHorizontal="true"
             android:onClick="goToRegister"
-            android:text="SIGN UP" />
+            android:text="SIGN UP"
+            android:background="@drawable/button_background"
+            android:textColor="@android:color/white"
+            android:padding="16dp"
+            android:textSize="18sp" />
 
         <Button
             android:id="@+id/button3"
-            android:layout_width="380dp"
-            android:layout_height="65dp"
-            android:layout_alignParentStart="true"
-            android:layout_alignParentBottom="true"
-            android:layout_marginStart="20dp"
-            android:layout_marginBottom="162dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_above="@id/button2"
+            android:layout_centerHorizontal="true"
             android:onClick="goToLogin"
-            android:text="SIGN IN" />
+            android:text="SIGN IN"
+            android:background="@drawable/button_background"
+            android:textColor="@android:color/white"
+            android:padding="16dp"
+            android:textSize="18sp" />
 
     </RelativeLayout>
 </RelativeLayout>

@@ -6,16 +6,19 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 public class PasswordActivity extends AppCompatActivity {
 
     private String email;
     private EditText e3_password;
     private TextView passwordStrengthTextView;
+    private ImageView passwordToggle;
+    private boolean isPasswordVisible = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,6 +27,7 @@ public class PasswordActivity extends AppCompatActivity {
 
         e3_password = findViewById(R.id.editTextTextPassword2);
         passwordStrengthTextView = findViewById(R.id.password_strength_textview);
+        passwordToggle = findViewById(R.id.password_toggle);
 
         Intent myIntent = getIntent();
         if (myIntent != null) {
@@ -32,23 +36,26 @@ public class PasswordActivity extends AppCompatActivity {
 
         if (email == null || email.isEmpty()) {
             Toast.makeText(this, "No email provided", Toast.LENGTH_SHORT).show();
-            // Optionally, you can finish the activity if email is essential
-            // finish();
         }
 
         e3_password.addTextChangedListener(new TextWatcher() {
             @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {}
 
             @Override
             public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
                 String password = e3_password.getText().toString();
-                passwordStrengthTextView.setText(getPasswordStrength(password));
+                updatePasswordStrength(password);
             }
 
             @Override
-            public void afterTextChanged(Editable editable) {
+            public void afterTextChanged(Editable editable) {}
+        });
+
+        passwordToggle.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                togglePasswordVisibility();
             }
         });
     }
@@ -98,5 +105,36 @@ public class PasswordActivity extends AppCompatActivity {
         } else {
             return "Weak";
         }
+    }
+
+    private void updatePasswordStrength(String password) {
+        String strength = getPasswordStrength(password);
+        passwordStrengthTextView.setText(strength);
+
+        int color;
+        switch (strength) {
+            case "Strong":
+                color = ContextCompat.getColor(this, android.R.color.holo_green_dark);
+                break;
+            case "Medium":
+                color = ContextCompat.getColor(this, android.R.color.holo_orange_dark);
+                break;
+            default:
+                color = ContextCompat.getColor(this, android.R.color.holo_red_dark);
+                break;
+        }
+        passwordStrengthTextView.setTextColor(color);
+    }
+
+    private void togglePasswordVisibility() {
+        if (isPasswordVisible) {
+            e3_password.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_PASSWORD);
+            passwordToggle.setImageResource(R.drawable.ic_visibility_off);
+        } else {
+            e3_password.setInputType(android.text.InputType.TYPE_CLASS_TEXT | android.text.InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+            passwordToggle.setImageResource(R.drawable.ic_visibility);
+        }
+        e3_password.setSelection(e3_password.length());
+        isPasswordVisible = !isPasswordVisible;
     }
 }
