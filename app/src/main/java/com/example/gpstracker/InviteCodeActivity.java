@@ -80,9 +80,8 @@ public class InviteCodeActivity extends AppCompatActivity {
                 .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
-                        // Check if the task is successful
                         if (task.isSuccessful()) {
-                            // Create a new user in the Firebase Realtime Database
+                            // Proceed with creating the user in the database
                             CreateUser createUser = new CreateUser(name, email, password, code, "false", "na", "na", "na");
                             user = auth.getCurrentUser();
                             userId = user != null ? user.getUid() : null;
@@ -92,7 +91,6 @@ public class InviteCodeActivity extends AppCompatActivity {
                                         .addOnCompleteListener(new OnCompleteListener<Void>() {
                                             @Override
                                             public void onComplete(@NonNull Task<Void> task) {
-                                                // Dismiss the progress dialog and show a toast message
                                                 progressDialog.dismiss();
                                                 if (task.isSuccessful()) {
                                                     Toast.makeText(getApplicationContext(), "User Registered Successfully!", Toast.LENGTH_LONG).show();
@@ -106,11 +104,13 @@ public class InviteCodeActivity extends AppCompatActivity {
                                 Toast.makeText(getApplicationContext(), "User Registration Failed: User ID is null", Toast.LENGTH_LONG).show();
                             }
                         } else {
-                            // Dismiss the progress dialog and show a failure toast message
+                            // Log the error message
                             progressDialog.dismiss();
-                            Toast.makeText(getApplicationContext(), "User Registration Failed!", Toast.LENGTH_LONG).show();
+                            String errorMessage = task.getException() != null ? task.getException().getMessage() : "Unknown error";
+                            Toast.makeText(getApplicationContext(), "User Registration Failed: " + errorMessage, Toast.LENGTH_LONG).show();
                         }
                     }
                 });
+
     }
 }
