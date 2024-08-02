@@ -4,16 +4,13 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
@@ -21,17 +18,18 @@ import com.google.firebase.database.FirebaseDatabase;
 
 public class InviteCodeActivity extends AppCompatActivity {
 
-    // Class members for storing user details
-    String name, email, password, issharing, code, date;
+    private static final String TAG = "InviteCodeActivity";
+
+    // Variables to store user details
+    String name, email, password, isSharing, code;
     Uri imageUri;
 
-    // ProgressDialog to show loading indication
+    // Progress dialog to show loading indication
     ProgressDialog progressDialog;
 
-    // UI elements and Firebase references
+    // UI elements
     TextView t1;
     FirebaseAuth auth;
-    FirebaseUser user;
     DatabaseReference reference;
     String userId;
 
@@ -42,75 +40,87 @@ public class InviteCodeActivity extends AppCompatActivity {
 
         // Initialize the ProgressDialog
         progressDialog = new ProgressDialog(this);
+        progressDialog.setMessage("Please wait. Your account is being created");
 
-        // Initialize UI elements
+        // Find the TextView for displaying the invite code
         t1 = findViewById(R.id.textView);
 
         // Initialize FirebaseAuth instance
         auth = FirebaseAuth.getInstance();
 
-        // Get data passed from the previous activity
-        Intent myIntent = getIntent();
-
-        // Initialize FirebaseDatabase reference
+        // Initialize Firebase Database reference pointing to the "Users" node
         reference = FirebaseDatabase.getInstance().getReference().child("Users");
 
-        // Check if the intent has extras and retrieve them
+        // Get the intent that started this activity
+        Intent myIntent = getIntent();
+
+        // Extract data passed from the previous activity
         if (myIntent != null) {
             name = myIntent.getStringExtra("name");
             email = myIntent.getStringExtra("email");
             password = myIntent.getStringExtra("password");
             code = myIntent.getStringExtra("code");
-            issharing = myIntent.getStringExtra("isSharing");
+            isSharing = myIntent.getStringExtra("isSharing");
             imageUri = myIntent.getParcelableExtra("uri");
+
+            // Log the received data
+            Log.d(TAG, "Received Data: name=" + name + ", email=" + email + ", password=" + password + ", code=" + code + ", isSharing=" + isSharing + ", uri=" + imageUri);
         }
 
         // Set the invite code in the TextView
         t1.setText(code);
     }
 
-    // Method to register the user when the register button is clicked
     public void registerUser(View v) {
-        // Show the progress dialog
-        progressDialog.setMessage("Please wait. Your account is being created");
+        Log.d(TAG, "Register button clicked");
+
+        // Check if email and password are not null or empty
+        if (email == null || email.isEmpty() || password == null || password.isEmpty()) {
+            Log.e(TAG, "Email or Password is empty or null");
+            Toast.makeText(getApplicationContext(), "Email or Password cannot be empty", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // Show the progress dialog with a message
         progressDialog.show();
 
-        // Create a new user with email and password using FirebaseAuth
-        auth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Proceed with creating the user in the database
-                            CreateUser createUser = new CreateUser(name, email, password, code, "false", "na", "na", "na");
-                            user = auth.getCurrentUser();
-                            userId = user != null ? user.getUid() : null;
+        // Get the current user
+        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (currentUser != null) {
+            // Get the user ID
+            userId = currentUser.getUid();
 
-                            if (userId != null) {
-                                reference.child(userId).setValue(createUser)
-                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<Void> task) {
-                                                progressDialog.dismiss();
-                                                if (task.isSuccessful()) {
-                                                    Toast.makeText(getApplicationContext(), "User Registered Successfully!", Toast.LENGTH_LONG).show();
-                                                } else {
-                                                    Toast.makeText(getApplicationContext(), "User Registration Failed!", Toast.LENGTH_LONG).show();
-                                                }
-                                            }
-                                        });
-                            } else {
-                                progressDialog.dismiss();
-                                Toast.makeText(getApplicationContext(), "User Registration Failed: User ID is null", Toast.LENGTH_LONG).show();
-                            }
+            // Create a new CreateUser object with the user details
+            CreateUser createUser = new CreateUser(
+                    name, email, password, code, "false", "na", "na",
+                    imageUri != null ? imageUri.toString() : "na"
+            );
+
+            // Store the user details in the Firebase Database
+            reference.child(userId).setValue(createUser)
+                    .addOnCompleteListener(task1 -> {
+                        // Dismiss the progress dialog
+                        progressDialog.dismiss();
+                        if (task1.isSuccessful()) {
+                            // User registration successful
+                            Log.d(TAG, "User Registered Successfully!");
+                            Toast.makeText(getApplicationContext(), "User Registered Successfully!", Toast.LENGTH_LONG).show();
+
+                            // Start the MyNavigationActivity
+                            Intent myIntent = new Intent(InviteCodeActivity.this, MyNavigationActivity.class);
+                            startActivity(myIntent);
+                            finish(); // Close the current activity
                         } else {
-                            // Log the error message
-                            progressDialog.dismiss();
-                            String errorMessage = task.getException() != null ? task.getException().getMessage() : "Unknown error";
-                            Toast.makeText(getApplicationContext(), "User Registration Failed: " + errorMessage, Toast.LENGTH_LONG).show();
+                            // User registration failed, log the error
+                            Log.e(TAG, "User Registration Failed!", task1.getException());
+                            Toast.makeText(getApplicationContext(), "User Registration Failed!", Toast.LENGTH_LONG).show();
                         }
-                    }
-                });
-
+                    });
+        } else {
+            // Current user is null, handle the error
+            progressDialog.dismiss();
+            Log.e(TAG, "No user is currently signed in");
+            Toast.makeText(getApplicationContext(), "No user is currently signed in.", Toast.LENGTH_LONG).show();
+        }
     }
 }

@@ -1,13 +1,14 @@
 {
   "project_info": {
     "project_number": "263853714411",
+    "firebase_url": "https://gps-family-tracker-86b91-default-rtdb.firebaseio.com",
     "project_id": "gps-family-tracker-86b91",
     "storage_bucket": "gps-family-tracker-86b91.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:263853714411:android:302c285e111e9887ba47ae",
+        "mobilesdk_app_id": "1:263853714411:android:d2d7dab43bae36e5ba47ae",
         "android_client_info": {
           "package_name": "com.example.gpstracker"
         }

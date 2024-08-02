@@ -2,4 +2,5 @@
 <resources>
     <item name="circleImageView" type="id" />
     <item name="editTextText" type="id" />
+    <item name="button5" type="id" />
 </resources>

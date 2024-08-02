@@ -34,16 +34,27 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/editTextText"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="67dp"
-        android:onClick="generateCode"
-        android:text="Next" />
+        android:layout_marginTop="20dp"
+        android:text="NEXT"
+        android:onClick="generateCode" />
 
-    <com.canhub.cropper.CropImageView
-        android:id="@+id/cropImageView"
-        android:layout_width="match_parent"
-        android:layout_height="454dp"
+    <CheckBox
+        android:id="@+id/email_verification_checkbox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Email Verified"
+        android:visibility="gone"
         android:layout_below="@id/button5"
-        android:layout_marginTop="66dp"
-        app:cropShape="rectangle" />
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp" />
 
+    <Button
+        android:id="@+id/check_verification_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/email_verification_checkbox"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="Check Verification"
+        android:onClick="checkEmailVerification" />
 </RelativeLayout>
