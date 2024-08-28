@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -17,6 +19,9 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
@@ -40,6 +45,8 @@ public class NameActivity extends AppCompatActivity {
     private Runnable verificationCheck;
     private DatabaseReference reference;
     private ProgressDialog progressDialog;
+    private Button checkVerificationButton;
+    private StorageReference storageReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +56,11 @@ public class NameActivity extends AppCompatActivity {
         editTextName = findViewById(R.id.editTextText);
         circleImageView = findViewById(R.id.circleImageView);
         emailVerificationCheckbox = findViewById(R.id.email_verification_checkbox);
+        checkVerificationButton = findViewById(R.id.check_verification_button); // Assume this button is in the layout
         auth = FirebaseAuth.getInstance();
         reference = FirebaseDatabase.getInstance().getReference().child("Users");
         progressDialog = new ProgressDialog(this);
+        storageReference = FirebaseStorage.getInstance().getReference().child("ProfileImages");
 
         Intent myIntent = getIntent();
         if (myIntent != null) {
@@ -61,24 +70,25 @@ public class NameActivity extends AppCompatActivity {
 
         user = auth.getCurrentUser();
         handler = new Handler();
-        verificationCheck = new Runnable() {
-            @Override
-            public void run() {
-                user.reload().addOnCompleteListener(task -> {
-                    if (user != null && user.isEmailVerified()) {
-                        emailVerificationCheckbox.setVisibility(View.VISIBLE);
-                        emailVerificationCheckbox.setChecked(true);
-                        handler.removeCallbacks(verificationCheck);
-                    } else {
-                        handler.postDelayed(verificationCheck, 3000);
-                    }
-                });
-            }
-        };
+
+        checkVerificationButton.setOnClickListener(v -> checkEmailVerification());
 
         if (user != null && !user.isEmailVerified()) {
             handler.post(verificationCheck);
         }
+    }
+
+    // Method to check email verification status
+    private void checkEmailVerification() {
+        user.reload().addOnCompleteListener(task -> {
+            if (user != null && user.isEmailVerified()) {
+                emailVerificationCheckbox.setVisibility(View.VISIBLE);
+                emailVerificationCheckbox.setChecked(true);
+                Toast.makeText(NameActivity.this, "Email verified. You can now proceed.", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(NameActivity.this, "Email not verified. Please verify your email before proceeding.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void generateCode(View v) {
@@ -94,29 +104,55 @@ public class NameActivity extends AppCompatActivity {
         }
 
         if (user != null && user.isEmailVerified()) {
-            Intent intent = new Intent(NameActivity.this, InviteCodeActivity.class);
-            intent.putExtra("name", name);
-            intent.putExtra("email", email);
-            intent.putExtra("password", password);
-            intent.putExtra("uri", resultUri.toString());
+            progressDialog.setMessage("Uploading image...");
+            progressDialog.show();
 
-            Date myDate = new Date();
-            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            String date = format.format(myDate);
-            Random r = new Random();
-            int n = 100000 + r.nextInt(900000);
-            String code = String.valueOf(n);
-            String isSharing = "false";
+            // Create a unique file name for the image
+            String fileName = user.getUid() + "_" + System.currentTimeMillis() + ".jpg";
+            StorageReference imageRef = storageReference.child(fileName);
 
-            intent.putExtra("code", code);
-            intent.putExtra("isSharing", isSharing);
+            // Upload the file to Firebase Storage
+            UploadTask uploadTask = imageRef.putFile(resultUri);
+            uploadTask.addOnSuccessListener(taskSnapshot -> {
+                // Get the download URL of the uploaded image
+                imageRef.getDownloadUrl().addOnSuccessListener(uri -> {
+                    String imageUrl = uri.toString();
 
-            startActivity(intent);
+                    // Proceed to the next activity with the image URL
+                    Intent intent = new Intent(NameActivity.this, InviteCodeActivity.class);
+                    intent.putExtra("name", name);
+                    intent.putExtra("email", email);
+                    intent.putExtra("password", password);
+                    intent.putExtra("imageUrl", imageUrl); // Pass the image URL to the next activity
+
+                    Date myDate = new Date();
+                    SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+                    String date = format.format(myDate);
+                    Random r = new Random();
+                    int n = 100000 + r.nextInt(900000);
+                    String code = String.valueOf(n);
+                    String isSharing = "false";
+
+                    intent.putExtra("code", code);
+                    intent.putExtra("isSharing", isSharing);
+
+                    progressDialog.dismiss();
+                    startActivity(intent);
+                    finish();
+
+                }).addOnFailureListener(e -> {
+                    progressDialog.dismiss();
+                    Toast.makeText(NameActivity.this, "Failed to get image URL", Toast.LENGTH_SHORT).show();
+                });
+
+            }).addOnFailureListener(e -> {
+                progressDialog.dismiss();
+                Toast.makeText(NameActivity.this, "Image upload failed", Toast.LENGTH_SHORT).show();
+            });
         } else {
             Toast.makeText(NameActivity.this, "Please verify your email before generating a code.", Toast.LENGTH_SHORT).show();
         }
     }
-
 
     public void selectImage(View v) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -145,6 +181,9 @@ public class NameActivity extends AppCompatActivity {
                 resultUri = UCrop.getOutput(data);
                 if (resultUri != null) {
                     circleImageView.setImageURI(resultUri);
+                    Log.d("NameActivity", "Image URI: " + resultUri.toString());
+                } else {
+                    Log.d("NameActivity", "Cropped Image URI is null");
                 }
             }
         }

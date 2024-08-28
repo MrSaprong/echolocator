@@ -3,6 +3,7 @@ package com.example.gpstracker;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Patterns;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -32,6 +33,12 @@ public class RegisterActivity extends AppCompatActivity {
 
     public void goToPasswordActivity(View v) {
         String email = e4_email.getText().toString().trim();
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            Toast.makeText(getApplicationContext(), "Please enter a valid email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
         if (email.isEmpty()) {
             Toast.makeText(getApplicationContext(), "Please enter an email", Toast.LENGTH_SHORT).show();
             return;
@@ -55,6 +62,7 @@ public class RegisterActivity extends AppCompatActivity {
                                 Intent myIntent = new Intent(RegisterActivity.this, PasswordActivity.class);
                                 myIntent.putExtra("email", email);
                                 startActivity(myIntent);
+                                finish();
                             } else {
                                 Toast.makeText(getApplicationContext(), "This email already exists", Toast.LENGTH_SHORT).show();
                             }

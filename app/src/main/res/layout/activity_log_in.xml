@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
@@ -6,39 +5,61 @@
     android:layout_height="match_parent"
     tools:context=".LogInActivity">
 
-
     <EditText
         android:id="@+id/editTextTextEmailAddress"
         android:layout_width="match_parent"
         android:layout_height="55dp"
         android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="253dp"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="2dp"
+        android:layout_marginTop="247dp"
+        android:layout_marginEnd="0dp"
         android:ems="10"
         android:hint="Enter Email"
-        android:inputType="textEmailAddress" />
+        android:inputType="textEmailAddress"
+        android:padding="16dp" />
 
     <EditText
         android:id="@+id/editTextTextPassword"
         android:layout_width="match_parent"
         android:layout_height="58dp"
-        android:layout_alignParentStart="true"
         android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:layout_marginStart="0dp"
-        android:layout_marginTop="365dp"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="338dp"
         android:ems="10"
         android:hint="Enter Password"
-        android:inputType="textPassword" />
+        android:inputType="textPassword"
+        android:padding="16dp" />
+
+    <ImageView
+        android:id="@+id/imageViewPasswordToggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_centerVertical="true"
+        android:layout_marginTop="343dp"
+        android:layout_marginEnd="17dp"
+        android:clickable="true"
+        android:contentDescription="Toggle Password Visibility"
+        android:focusable="true"
+        android:padding="8dp"
+        android:src="@drawable/ic_visibility_off"
+        tools:ignore="NotSibling" />
 
     <Button
         android:id="@+id/button"
-        android:layout_width="wrap_content"
+        android:layout_width="374dp"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
+        android:background="@drawable/button_background"
         android:layout_centerHorizontal="true"
-        android:layout_marginBottom="293dp"
+        android:layout_marginBottom="259dp"
         android:onClick="login"
-        android:text="LOGIN" />
+        android:paddingBottom="16dp"
+        android:textColor="@android:color/white"
+        android:text="LOGIN"
+        android:textSize="18sp"
+        tools:ignore="OnClick" />
 </RelativeLayout>

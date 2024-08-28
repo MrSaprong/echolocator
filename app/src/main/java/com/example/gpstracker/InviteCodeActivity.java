@@ -2,16 +2,21 @@ package com.example.gpstracker;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -21,17 +26,16 @@ public class InviteCodeActivity extends AppCompatActivity {
     private static final String TAG = "InviteCodeActivity";
 
     // Variables to store user details
-    String name, email, password, isSharing, code;
-    Uri imageUri;
+    private String name, email, password, isSharing, code, imageUrl;
 
     // Progress dialog to show loading indication
-    ProgressDialog progressDialog;
+    private ProgressDialog progressDialog;
 
     // UI elements
-    TextView t1;
-    FirebaseAuth auth;
-    DatabaseReference reference;
-    String userId;
+    private TextView t1;
+    private FirebaseAuth auth;
+    private DatabaseReference reference;
+    private String userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +65,10 @@ public class InviteCodeActivity extends AppCompatActivity {
             password = myIntent.getStringExtra("password");
             code = myIntent.getStringExtra("code");
             isSharing = myIntent.getStringExtra("isSharing");
-            imageUri = myIntent.getParcelableExtra("uri");
+            imageUrl = myIntent.getStringExtra("imageUrl"); // Get the image URL
 
             // Log the received data
-            Log.d(TAG, "Received Data: name=" + name + ", email=" + email + ", password=" + password + ", code=" + code + ", isSharing=" + isSharing + ", uri=" + imageUri);
+            Log.d(TAG, "Received Data: name=" + name + ", email=" + email + ", password=" + password + ", code=" + code + ", isSharing=" + isSharing + ", imageUrl=" + imageUrl);
         }
 
         // Set the invite code in the TextView
@@ -84,43 +88,80 @@ public class InviteCodeActivity extends AppCompatActivity {
         // Show the progress dialog with a message
         progressDialog.show();
 
-        // Get the current user
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        // Try to create a new user with email and password
+        auth.createUserWithEmailAndPassword(email, password)
+                .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                    @Override
+                    public void onComplete(@NonNull Task<AuthResult> task) {
+                        if (task.isSuccessful()) {
+                            // Registration successful, proceed with saving user data
+                            saveUserData();
+                        } else {
+                            // Check if the failure is due to email already in use
+                            if (task.getException() instanceof FirebaseAuthUserCollisionException) {
+                                // Email already in use, log in the user
+                                auth.signInWithEmailAndPassword(email, password)
+                                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                                if (task.isSuccessful()) {
+                                                    // Log in successful, proceed with saving user data
+                                                    saveUserData();
+                                                } else {
+                                                    Log.e(TAG, "User Login Failed!", task.getException());
+                                                    Toast.makeText(getApplicationContext(), "User Login Failed!", Toast.LENGTH_LONG).show();
+                                                    progressDialog.dismiss();
+                                                }
+                                            }
+                                        });
+                            } else {
+                                Log.e(TAG, "User Registration Failed!", task.getException());
+                                Toast.makeText(getApplicationContext(), "User Registration Failed!", Toast.LENGTH_LONG).show();
+                                progressDialog.dismiss();
+                            }
+                        }
+                    }
+                });
+    }
+
+    private void saveUserData() {
+        FirebaseUser currentUser = auth.getCurrentUser();
         if (currentUser != null) {
-            // Get the user ID
             userId = currentUser.getUid();
 
             // Create a new CreateUser object with the user details
             CreateUser createUser = new CreateUser(
-                    name, email, password, code, "false", "na", "na",
-                    imageUri != null ? imageUri.toString() : "na"
+                    name, email, password, code, "false", "na", "na", imageUrl, currentUser.getUid()
             );
 
             // Store the user details in the Firebase Database
             reference.child(userId).setValue(createUser)
                     .addOnCompleteListener(task1 -> {
-                        // Dismiss the progress dialog
-                        progressDialog.dismiss();
                         if (task1.isSuccessful()) {
-                            // User registration successful
-                            Log.d(TAG, "User Registered Successfully!");
+                            Log.d(TAG, "User Registered Successfully with Image!");
                             Toast.makeText(getApplicationContext(), "User Registered Successfully!", Toast.LENGTH_LONG).show();
 
-                            // Start the MyNavigationActivity
-                            Intent myIntent = new Intent(InviteCodeActivity.this, MyNavigationActivity.class);
+                            // Start the next activity
+                            Intent myIntent = new Intent(InviteCodeActivity.this, UserLocationMainActivity.class);
+                            myIntent.putExtra("imageUrl", imageUrl); // Pass the image URL to the next activity if needed
                             startActivity(myIntent);
-                            finish(); // Close the current activity
+
+                            // Delay finish() to avoid DeadObjectException
+                            new Handler().postDelayed(() -> {
+                                progressDialog.dismiss(); // Dismiss the progress dialog before finishing the activity
+                                finish(); // Close the current activity
+                            }, 500);
+
                         } else {
-                            // User registration failed, log the error
                             Log.e(TAG, "User Registration Failed!", task1.getException());
                             Toast.makeText(getApplicationContext(), "User Registration Failed!", Toast.LENGTH_LONG).show();
+                            progressDialog.dismiss();
                         }
                     });
         } else {
-            // Current user is null, handle the error
+            Log.e(TAG, "Current user is null after registration or login");
+            Toast.makeText(getApplicationContext(), "Error: User registration/login completed, but user is null.", Toast.LENGTH_LONG).show();
             progressDialog.dismiss();
-            Log.e(TAG, "No user is currently signed in");
-            Toast.makeText(getApplicationContext(), "No user is currently signed in.", Toast.LENGTH_LONG).show();
         }
     }
 }

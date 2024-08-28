@@ -2,13 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.example.gpstracker">
-
-    <!-- Requesting permissions to read and write external storage and use the internet -->
+    <!-- Permissions -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera.any" android:required="true" />
 
 
     <application
@@ -22,16 +23,58 @@
         android:supportsRtl="true"
         android:testOnly="false"
         android:theme="@style/Theme.GPSTracker"
+        tools:ignore="AppLinkUrlError,HardcodedDebugMode"
         tools:replace="android:label"
-        tools:targetApi="31"
-        tools:ignore="HardcodedDebugMode">
-
+        tools:targetApi="31">
         <activity
-            android:name=".MyNavigationActivity"
+            android:name=".CircleMembersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".JoinedCircleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".SplashActivity"
+            android:exported="false" />
+        <activity
+            android:name=".MyCircleActivity"
+            android:exported="false" />
+        <activity
+            android:name=".JoinCircleActivity"
             android:exported="false"
-            android:label="@string/title_activity_my_navigation"
-            android:theme="@style/Theme.GPSTracker.NoActionBar" />
-        <!-- Activity declarations with their export status -->
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|screenSize"/>
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity> <!-- User location main activity -->
+        <activity
+            android:name=".UserLocationMainActivity"
+            android:exported="false"
+            android:label="@string/title_activity_user_location_main"
+            android:theme="@style/Theme.GPSTracker.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="www.google.com"
+                    android:pathPrefix="/maps"
+                    android:scheme="https" />
+            </intent-filter>
+        </activity> <!-- Google Maps API key metadata -->
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyD25QI43liTWykG7VwkP-A5amy8-MHs1bs" /> <!-- Other activities declarations -->
         <activity
             android:name=".InviteCodeActivity"
             android:exported="false" />
@@ -46,22 +89,16 @@
             android:exported="false" />
         <activity
             android:name=".LogInActivity"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-        <!-- Theme is optional and only needed if default theme has no action bar. -->
+            android:exported="false" /> <!-- Image cropping activities -->
+        <activity android:name=".InviteMemberActivity" />
         <activity
             android:name="com.canhub.cropper.CropImageActivity"
             android:theme="@style/Base.Theme.AppCompat" />
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
-            android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
+            android:screenOrientation="fullSensor"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+            tools:replace="android:screenOrientation" />
     </application>
+
 </manifest>

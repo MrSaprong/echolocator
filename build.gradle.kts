@@ -5,6 +5,7 @@ plugins {
     id("com.android.library") version "8.1.2" apply false
     id("org.jetbrains.kotlin.android") version "1.9.23" apply false
     id("com.google.gms.google-services") version "4.3.15" apply false
+    alias(libs.plugins.com.google.android.libraries.mapsplatform.secrets.gradle.plugin) apply false
 }
 
 true // Needed to make the Suppress annotation work for the plugins block
@@ -17,3 +18,4 @@ buildscript {
         // in the individual module build.gradle files
     }
 }
+

@@ -130,6 +130,7 @@ public class PasswordActivity extends AppCompatActivity {
         intent.putExtra("email", email); // Pass email to NameActivity
         intent.putExtra("password", password); // Pass password to NameActivity
         startActivity(intent);
+        finish();
     }
 
     // Method to check if the entered password is valid
